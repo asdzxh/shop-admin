@@ -48,10 +48,17 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { adminLogin } from '~/api/http'
+import { ElNotification } from 'element-plus'
+
+
+const router = useRouter()
 
 const form = reactive({
-    username: '',
-    password: ''
+    username: 'admin',
+    password: '123456'
 })
 
 const rules = {
@@ -79,9 +86,29 @@ const onSubmit = () => {
             return false;
         }
         //发请求
-        console.log('验证通过');
+        adminLogin(form.username, form.password)
+            .then((res) => {
+                console.log(res)
+                //提示登录成功
+                ElNotification({
+                    message: '登录成功',
+                    type: 'success',
+                    duration: 2000
+                })
+                router.push('/')
+            })
+            .catch((err) => {
+                console.log(err)
+                ElNotification({
+                    message: err.response.data.msg || '请求失败',
+                    type: 'error',
+                    duration: 2000
+                })
+
+            })
     })
 }
+
 
 
 </script>
