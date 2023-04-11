@@ -14,9 +14,10 @@
                 <span class="h-[1px] w-16 bg-gray-200"></span>
 
             </div>
-            <el-form>
-                <el-form-item label="Username">
-                    <el-input placeholder="Username">
+
+            <el-form :model="form" :rules="rules" ref="formRef">
+                <el-form-item label="Username" prop="username">
+                    <el-input placeholder="Username" v-model="form.username">
 
                         <template #prefix>
                             <el-icon>
@@ -26,8 +27,8 @@
                     </el-input>
                 </el-form-item>
 
-                <el-form-item label="Password">
-                    <el-input type="password" placeholder="Password">
+                <el-form-item label="Password" prop="password">
+                    <el-input type="password" placeholder="Password" v-model="form.password">
                         <template #prefix>
                             <el-icon>
                                 <lock />
@@ -37,7 +38,8 @@
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button class="w-full py-4 bg-indigo-600 text-light-50 rounded-full" size="default">登录</el-button>
+                    <el-button class="w-full py-4 bg-indigo-600 text-light-50 rounded-full" size="default"
+                        @click="onSubmit">登录</el-button>
                 </el-form-item>
             </el-form>
         </el-col>
@@ -45,6 +47,42 @@
 </template>
 
 <script setup>
+import { reactive, ref } from 'vue'
+
+const form = reactive({
+    username: '',
+    password: ''
+})
+
+const rules = {
+    username: [
+        {
+            required: true,
+            message: '用户名不能为空',
+            trigger: 'blur'
+        }
+    ],
+    password: [
+        {
+            required: true,
+            message: '密码不能为空',
+            trigger: 'blur'
+        }
+    ]
+}
+
+const formRef = ref(null)
+
+const onSubmit = () => {
+    formRef.value.validate((valid) => {
+        if (!valid) {
+            return false;
+        }
+        //发请求
+        console.log('验证通过');
+    })
+}
+
 
 </script>
 
