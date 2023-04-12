@@ -38,8 +38,8 @@
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button class="w-full py-4 bg-indigo-600 text-light-50 rounded-full" size="default"
-                        @click="onSubmit">登录</el-button>
+                    <el-button class="w-full py-4 bg-indigo-600 text-light-50 rounded-full" size="default" @click="onSubmit"
+                        :loading="loading">登录</el-button>
                 </el-form-item>
             </el-form>
         </el-col>
@@ -53,10 +53,12 @@ import { useRouter } from 'vue-router'
 import { adminLogin } from '~/api/http'
 import { ElNotification } from 'element-plus'
 
-import { useCookies } from '@vueuse/integrations/useCookies'
+// import { useCookies } from '@vueuse/integrations/useCookies'
+import { setToken } from '~/utils/auth'
 
 
 const router = useRouter()
+
 
 const form = reactive({
     username: 'admin',
@@ -89,19 +91,22 @@ const onSubmit = () => {
         if (!valid) {
             return false;
         }
+        loading.value = true
+
         //发请求
         adminLogin(form.username, form.password)
             .then((res) => {
-                console.log(res.data)
+                console.log(res)
 
 
                 //提示登录成功或失败
-                if (res.data.code == 1) {
+                if (res.code == 1) {
 
 
                     //将 token 存入cookie
-                    const cookie = useCookies()
-                    cookie.set('admin-token', res.data.data.token)
+                    // const cookie = useCookies()
+                    // cookie.set('admin-token', res.data.token)
+                    setToken(res.data.token)
 
                     ElNotification({
                         message: '登录成功',
@@ -117,16 +122,18 @@ const onSubmit = () => {
                     })
                 }
 
+            }).finally(() => {
+                loading.value = false
             })
-            .catch((err) => {
-                console.log(err)
-                ElNotification({
-                    message: err.response.data.message || '请求失败',
-                    type: 'error',
-                    duration: 2000
-                })
+        // .catch((err) => {
+        //     console.log(err)
+        //     ElNotification({
+        //         message: err.response.data.message || '请求失败',
+        //         type: 'error',
+        //         duration: 2000
+        //     })
 
-            })
+        // })
     })
 }
 
