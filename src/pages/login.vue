@@ -53,6 +53,8 @@ import { useRouter } from 'vue-router'
 import { adminLogin } from '~/api/http'
 import { ElNotification } from 'element-plus'
 
+import { useCookies } from '@vueuse/integrations/useCookies'
+
 
 const router = useRouter()
 
@@ -79,6 +81,8 @@ const rules = {
 }
 
 const formRef = ref(null)
+const loading = ref(false)
+
 
 const onSubmit = () => {
     formRef.value.validate((valid) => {
@@ -88,19 +92,36 @@ const onSubmit = () => {
         //发请求
         adminLogin(form.username, form.password)
             .then((res) => {
-                console.log(res)
-                //提示登录成功
-                ElNotification({
-                    message: '登录成功',
-                    type: 'success',
-                    duration: 2000
-                })
-                router.push('/')
+                console.log(res.data)
+
+
+                //提示登录成功或失败
+                if (res.data.code == 1) {
+
+
+                    //将 token 存入cookie
+                    const cookie = useCookies()
+                    cookie.set('admin-token', res.data.data.token)
+
+                    ElNotification({
+                        message: '登录成功',
+                        type: 'success',
+                        duration: 2000
+                    })
+                    router.push('/')
+                } else {
+                    ElNotification({
+                        message: '登录失败',
+                        type: 'error',
+                        duration: 2000
+                    })
+                }
+
             })
             .catch((err) => {
                 console.log(err)
                 ElNotification({
-                    message: err.response.data.msg || '请求失败',
+                    message: err.response.data.message || '请求失败',
                     type: 'error',
                     duration: 2000
                 })
